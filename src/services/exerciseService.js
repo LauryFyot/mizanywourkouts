@@ -1,24 +1,25 @@
-import { db } from '../firebase';
-import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
-import { auth } from "../firebase";
+import { db } from "../firebase";
+import { collection, getDocs, getDoc, doc } from "firebase/firestore";
 
-export const getAllExercises = async () => {
-  const workoutRef = doc(db, 'workouts', workoutId);
-  const workoutSnap = await getDoc(workoutRef);
+export const fetchAllExercises = async () => {
+  const querySnapshot = await getDocs(collection(db, "exercises"));
 
-  if (!workoutSnap.exists()) {
-    throw new Error('Workout not found');
-  }
+  // Fetch exercises with categories
+  const exerciseList = await Promise.all(
+    querySnapshot.docs.map(async (exerciseDoc) => {
+      // Replace ref categories by its name
+      const categoryRef = exerciseDoc.data().category;
 
-  const workout = workoutSnap.data();
+      // Fetch the category directly
+      const categoryDoc = await getDoc(categoryRef);
 
-  // Fetch exercise names from references
-  const exercises = await Promise.all(
-    workout.exercises.map(async (ex) => {
-      const exerciseSnap = await getDoc(ex.id);
-      return { id: ex.id, name: exerciseSnap.data().name, ...ex };
+      return {
+        id: exerciseDoc.id,
+        ...exerciseDoc.data(),
+        category: categoryDoc.data().category, // Directly add category name
+      };
     })
   );
 
-  return { ...workout, exercises };
+  return exerciseList;
 };

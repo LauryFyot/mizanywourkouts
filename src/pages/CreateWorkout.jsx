@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { collection, getDocs, addDoc, doc } from "firebase/firestore";
 import { db, auth } from "../firebase"; // Ensure firebaseConfig is properly set up
+import { fetchAllExercises } from "../services/exerciseService";
+import { addUserWorkout } from "../services/workoutService";
 
 const CreateWorkout = () => {
   const [title, setTitle] = useState("");
@@ -16,15 +18,11 @@ const CreateWorkout = () => {
 
   // Fetch exercises from Firestore
   useEffect(() => {
-    const fetchExercises = async () => {
-      const querySnapshot = await getDocs(collection(db, "exercises"));
-      const exerciseList = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+    const fetchData = async () => {
+      const exerciseList = await fetchAllExercises();
       setExercises(exerciseList);
     };
-    fetchExercises();
+    fetchData();
   }, []);
 
   // Add selected exercise to workout
@@ -34,7 +32,7 @@ const CreateWorkout = () => {
       return;
     }
 
-    const selectedExercise = exercises.find(ex => ex.id === exerciseId);
+    const selectedExercise = exercises.find((ex) => ex.id === exerciseId);
     setSelectedExercises([
       ...selectedExercises,
       {
@@ -53,25 +51,18 @@ const CreateWorkout = () => {
 
   // Save workout to Firestore
   const saveWorkout = async () => {
+    // Ensure workout is correctly field
     if (!title || selectedExercises.length === 0) {
       alert("Please add a title and at least one exercise.");
       return;
     }
 
+    // Add loading
     setLoading(true);
-    try {
-      const user = auth.currentUser; // Get the logged-in user
-      await addDoc(collection(db, "workouts"), {
-        title,
-        exercises: selectedExercises.map(ex => ({
-          id: ex.id,
-          duration: ex.duration,
-          repetitions: ex.repetitions,
-        })),
-        userId: doc(db, "users", user.uid), // Store user-specific workouts
-        createdAt: new Date(),
-      });
 
+    // Try adding workout, redirect to workouts list & end loading OR catch error
+    try {
+      addUserWorkout(title, selectedExercises);
       alert("Workout created successfully!");
       navigate("/workouts"); // Redirect to workouts page
     } catch (error) {
@@ -87,20 +78,12 @@ const CreateWorkout = () => {
       <h1>Create Workout</h1>
       <div>
         <label>Title:</label>
-        <input
-          type="text"
-          placeholder="Workout Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
+        <input type="text" placeholder="Workout Title" value={title} onChange={(e) => setTitle(e.target.value)} />
       </div>
 
       <div>
         <h2>Add Exercises:</h2>
-        <select
-          value={exerciseId}
-          onChange={(e) => setExerciseId(e.target.value)}
-        >
+        <select value={exerciseId} onChange={(e) => setExerciseId(e.target.value)}>
           <option value="">Select Exercise</option>
           {exercises.map((exercise) => (
             <option key={exercise.id} value={exercise.id}>
@@ -108,18 +91,8 @@ const CreateWorkout = () => {
             </option>
           ))}
         </select>
-        <input
-          type="number"
-          placeholder="Duration (sec)"
-          value={duration}
-          onChange={(e) => setDuration(e.target.value)}
-        />
-        <input
-          type="number"
-          placeholder="Reps"
-          value={repetitions}
-          onChange={(e) => setRepetitions(e.target.value)}
-        />
+        <input type="number" placeholder="Duration (sec)" value={duration} onChange={(e) => setDuration(e.target.value)} />
+        <input type="number" placeholder="Reps" value={repetitions} onChange={(e) => setRepetitions(e.target.value)} />
         <button onClick={addExerciseWorkout}>Add Exercise</button>
       </div>
 
@@ -129,8 +102,7 @@ const CreateWorkout = () => {
         <ul>
           {selectedExercises.map((exercise, index) => (
             <li key={index}>
-              {exercise.name} - {exercise.duration ? `${exercise.duration}s` : ""}{" "}
-              {exercise.repetitions ? `${exercise.repetitions} reps` : ""}
+              {exercise.name} - {exercise.duration ? `${exercise.duration}s` : ""} {exercise.repetitions ? `${exercise.repetitions} reps` : ""}
             </li>
           ))}
         </ul>
