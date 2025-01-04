@@ -1,0 +1,57 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "user",
+      "password": "pass"
+    }
+  ],
+  "exercises": [
+    {
+      "id": 1,
+      "name": "Push-ups",
+      "category": "Strength"
+    },
+    {
+      "id": 2,
+      "name": "Plank",
+      "category": "Core"
+    },
+    {
+      "id": 3,
+      "name": "Jumping Jacks",
+      "category": "Cardio"
+    }
+  ],
+  "workouts": [
+    {
+      "id": 1,
+      "userId": 1,
+      "title": "Morning Routine",
+      "exercises": [
+        {
+          "id": 1,
+          "duration": null,
+          "repetitions": 20
+        },
+        {
+          "id": 2,
+          "duration": 60,
+          "repetitions": null
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "userId": 1,
+      "title": "Quick Cardio",
+      "exercises": [
+        {
+          "id": 3,
+          "duration": 30,
+          "repetitions": null
+        }
+      ]
+    }
+  ]
+}
