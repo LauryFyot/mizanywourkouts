@@ -7,6 +7,7 @@ import Workouts from "./pages/Workouts";
 import CreateWorkout from "./pages/CreateWorkout";
 import StartWorkout from "./pages/StartWorkout";
 import CreateExercise from "./pages/CreateExercise";
+import EditWorkout from "./pages/EditWorkout";
 import { WorkoutProvider } from "./context/WorkoutContext";
 
 
@@ -62,6 +63,14 @@ const App = () => {
             element={
               <ProtectedRoute>
                 <CreateExercise />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/edit-workout/:id"
+            element={
+              <ProtectedRoute>
+                <EditWorkout />
               </ProtectedRoute>
             }
           />

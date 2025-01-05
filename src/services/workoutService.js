@@ -1,5 +1,5 @@
 import { db } from "../firebase";
-import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, addDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, deleteDoc, updateDoc, collection, query, where, getDocs, addDoc } from "firebase/firestore";
 import { auth } from "../firebase";
 
 // Get workout details from a workoutId
@@ -79,4 +79,11 @@ export const addUserWorkout = async (title, selectedExercises) => {
   } catch (error) {
     console.error("Error fetching workouts:", error);
   }
+};
+
+
+// Delete workout by ID
+export const deleteWorkoutById = async (id) => {
+  const workoutDoc = doc(db, "workouts", id); // Get the workout document reference
+  await deleteDoc(workoutDoc); // Delete workout from Firestore
 };
