@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { getWorkoutDetails } from '../services/workoutService';
-// import Timer from '../components/Timer';
 
 const StartWorkout = () => {
   const { id } = useParams();

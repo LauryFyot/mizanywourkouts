@@ -1,70 +1,61 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { collection, getDocs, addDoc, doc } from "firebase/firestore";
-import { db, auth } from "../firebase"; // Ensure firebaseConfig is properly set up
+import { db } from "../firebase";
 import { fetchAllExercises } from "../services/exerciseService";
 import { addUserWorkout } from "../services/workoutService";
+import { doc } from "firebase/firestore";
+
+// Import reusable components
+import ExerciseSelector from "../components/ExerciseSelector";
+import SelectedExercises from "../components/SelectedExercises";
+import SaveButton from "../components/SaveButton";
+import NavigateButton from "../components/NavigateButton";
 
 const CreateWorkout = () => {
+  // State for workout details
   const [title, setTitle] = useState("");
-  const [exercises, setExercises] = useState([]); // All exercises fetched
-  const [selectedExercises, setSelectedExercises] = useState([]); // Exercises added to the workout
-  const [exerciseId, setExerciseId] = useState(""); // Current selection
-  const [duration, setDuration] = useState("");
-  const [repetitions, setRepetitions] = useState("");
+  const [exercises, setExercises] = useState([]); // List of all exercises
+  const [selectedExercises, setSelectedExercises] = useState([]); // Selected exercises for this workout
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
-  // Fetch exercises from Firestore
-  useEffect(() => {
-    const fetchData = async () => {
+  // Show all exercises
+  const fetchData = async () => {
+    try {
       const exerciseList = await fetchAllExercises();
-      setExercises(exerciseList);
-    };
-    fetchData();
-  }, []);
-
-  // Add selected exercise to workout
-  const addExerciseWorkout = () => {
-    if (!exerciseId || (!duration && !repetitions)) {
-      alert("Please select an exercise and specify duration or repetitions.");
-      return;
+      setExercises(exerciseList); // Populate exercises dropdown
+    } catch (error) {
+      console.error("Error fetching exercises:", error);
     }
+  };
 
+  // Display selected exercises
+  const addExerciseWorkout = (exerciseId, duration, repetitions) => {
     const selectedExercise = exercises.find((ex) => ex.id === exerciseId);
-    setSelectedExercises([
-      ...selectedExercises,
+    setSelectedExercises((prev) => [
+      ...prev,
       {
-        id: doc(db, "exercises", exerciseId),
-        name: selectedExercise.name,
+        id: doc(db, "exercises", exerciseId), // Firestore doc reference
+        name: selectedExercise.name, // Exercise name
         duration: duration ? parseInt(duration) : null,
         repetitions: repetitions ? parseInt(repetitions) : null,
       },
     ]);
-
-    // Clear input fields
-    setExerciseId("");
-    setDuration("");
-    setRepetitions("");
   };
 
-  // Save workout to Firestore
+  // Save the workout
   const saveWorkout = async () => {
-    // Ensure workout is correctly field
     if (!title || selectedExercises.length === 0) {
       alert("Please add a title and at least one exercise.");
       return;
     }
 
-    // Add loading
-    setLoading(true);
-
-    // Try adding workout, redirect to workouts list & end loading OR catch error
     try {
-      addUserWorkout(title, selectedExercises);
+      setLoading(true);
+      await addUserWorkout(title, selectedExercises); // Save workout to Firestore
       alert("Workout created successfully!");
-      navigate("/workouts"); // Redirect to workouts page
+      navigate("/workouts"); // Redirect to workouts list
     } catch (error) {
       console.error("Error creating workout:", error);
       alert("Failed to create workout.");
@@ -73,45 +64,30 @@ const CreateWorkout = () => {
     }
   };
 
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   return (
     <div>
       <h1>Create Workout</h1>
+
+      {/* Workout Title */}
       <div>
         <label>Title:</label>
         <input type="text" placeholder="Workout Title" value={title} onChange={(e) => setTitle(e.target.value)} />
       </div>
 
-      <div>
-        <h2>Add Exercises:</h2>
-        <select value={exerciseId} onChange={(e) => setExerciseId(e.target.value)}>
-          <option value="">Select Exercise</option>
-          {exercises.map((exercise) => (
-            <option key={exercise.id} value={exercise.id}>
-              {exercise.name}
-            </option>
-          ))}
-        </select>
-        <input type="number" placeholder="Duration (sec)" value={duration} onChange={(e) => setDuration(e.target.value)} />
-        <input type="number" placeholder="Reps" value={repetitions} onChange={(e) => setRepetitions(e.target.value)} />
-        <button onClick={addExerciseWorkout}>Add Exercise</button>
-      </div>
+      {/* Add Exercises */}
+      <ExerciseSelector exercises={exercises} addExercise={addExerciseWorkout} />
+      <NavigateButton to="/add-exercise" text="Missing an exercise ?" />
 
-      <div>
-        <h2>Selected Exercises:</h2>
-        {selectedExercises.length === 0 && <p>No exercises added.</p>}
-        <ul>
-          {selectedExercises.map((exercise, index) => (
-            <li key={index}>
-              {exercise.name} - {exercise.duration ? `${exercise.duration}s` : ""} {exercise.repetitions ? `${exercise.repetitions} reps` : ""}
-            </li>
-          ))}
-        </ul>
-      </div>
+      {/* Display Selected Exercises */}
+      <SelectedExercises selectedExercises={selectedExercises} />
 
+      {/* Save Button */}
       <div>
-        <button disabled={loading} onClick={saveWorkout}>
-          {loading ? "Saving..." : "Save Workout"}
-        </button>
+        <SaveButton onClick={saveWorkout} loading={loading} text="Save Workout!" />
       </div>
     </div>
   );

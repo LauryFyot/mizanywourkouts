@@ -6,6 +6,7 @@ import Register from './pages/Register';
 import Workouts from './pages/Workouts';
 import CreateWorkout from './pages/CreateWorkout';
 import StartWorkout from './pages/StartWorkout';
+import CreateExercise from './pages/CreateExercise';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -51,6 +52,14 @@ const App = () => {
           element={
             <ProtectedRoute>
               <StartWorkout />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/add-exercise"
+          element={
+            <ProtectedRoute>
+              <CreateExercise />
             </ProtectedRoute>
           }
         />
