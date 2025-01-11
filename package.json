@@ -9,6 +9,7 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "firebase": "^11.1.0",
+    "framer-motion": "^11.15.0",
     "pg": "^8.13.1",
     "pg-hstore": "^2.3.4",
     "react": "^19.0.0",

@@ -19,7 +19,7 @@ const StartWorkout = () => {
       <h1>{workout?.title}</h1>
       {workout?.exercises.map((exercise, index) => (
         <div key={index}>
-          <p>{exercise.name}</p>
+          <p>{exercise.name} - {exercise.repetitions} or {exercise.duration}</p>
           {/* <Timer duration={exercise.duration} /> */}
         </div>
       ))}

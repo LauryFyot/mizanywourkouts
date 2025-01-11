@@ -1,6 +1,10 @@
+rm -rf node_modules package-lock.json
+npm install
+
 npm install express pg pg-hstore sequelize dotenv cors body-parser
 
 npm install react-router-dom web-vitals
+npm install react-scripts@latest
 
 INSTALL:
 npm install firebase
