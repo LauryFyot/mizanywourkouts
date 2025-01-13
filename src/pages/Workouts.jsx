@@ -45,7 +45,7 @@ const Workouts = () => {
       <ul>
         {workouts.map((workout) => (
           <li key={workout.id}>
-            <Link to={`/start-workout/${workout.id}`}>{workout.title}</Link>
+            <Link to={`/show-workout/${workout.id}`}>{workout.title}</Link>
             <button onClick={() => handleEdit(workout.id)} style={{ marginLeft: "10px" }}>
               Edit
             </button>

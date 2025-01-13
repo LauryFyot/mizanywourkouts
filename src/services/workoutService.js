@@ -21,7 +21,9 @@ export const getWorkoutDetails = async (workoutId) => {
   const exercises = await Promise.all(
     workout.exercises.map(async (ex) => {
       const exerciseSnap = await getDoc(ex.id);
-      return { id: ex.id, name: exerciseSnap.data().name, ...ex };
+      const categorySnap = await getDoc(exerciseSnap.data().category);
+
+      return { id: ex.id, name: exerciseSnap.data().name, category: categorySnap.data().category, ...ex };
     })
   );
 
